@@ -25,9 +25,59 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-      
+       
+        // await client.connect();
+      const reviewer=client.db('reviewDB').collection('reviewers')
+      const rooms=client.db('roomsDB').collection('room')
+
+
+        app.post('/user',async(req,res)=>{
+            const alldata=req.body;
+            const result=await reviewer.insertOne(alldata);
+            res.send(result)
+        });
+
+        app.get('/user',async(req,res)=>{
+            const courser=reviewer.find();
+            const result=await courser.toArray();
+            res.send(result);
+        })
+        
+        app.post('/bookings', async (req, res) => {
+            const { id, roomSize, price, availability, image } = req.body;
+        
+            if (!id || !roomSize || !price || !availability || !image) {
+                return res.status(400).send({ error: "Missing required fields" });
+            }
+        
+            const result = await rooms.insertOne({ id, roomSize, price, availability, image });
+            res.send(result);
+        });
+        
+
+        app.get('/bookings',async(req,res)=>{
+            const courser=rooms.find();
+            const result=await courser.toArray();
+            res.send(result);
+        })
+
+        app.delete('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+        
+            try {
+                const result = await bookingsCollection.deleteOne({ _id: new ObjectId(id) });
+                if (result.deletedCount === 1) {
+                    res.send({ success: true, message: "Room deleted successfully" });
+                } else {
+                    res.status(404).send({ success: false, message: "Room not found" });
+                }
+            } catch (error) {
+                console.error("Error deleting room:", error);
+                res.status(500).send({ success: false, message: "Internal server error" });
+            }
+        });
+        
+
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
