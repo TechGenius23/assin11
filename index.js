@@ -6,7 +6,7 @@ const port = process.env.PORT || 5000;
 
 
 // middleware
-app.use(cors());
+app.use(cors({origin:["http://localhost:5173/home","https://assignment11-30d37.web.app","https://assignment11-30d37.firebaseapp.com"],credentials:true}));
 app.use(express.json());
 
 
@@ -78,7 +78,7 @@ async function run() {
         });
         
 
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
